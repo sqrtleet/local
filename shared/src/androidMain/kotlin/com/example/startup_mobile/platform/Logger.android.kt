@@ -1,0 +1,17 @@
+package com.example.startup_mobile.platform
+
+import android.util.Log
+
+actual fun getLogger(): Logger = AndroidLogger()
+
+internal class AndroidLogger : Logger {
+    override fun log(level: LogLevel, tag: String, message: String, throwable: Throwable?) {
+        when (level) {
+            LogLevel.VERBOSE -> Log.v(tag, message, throwable)
+            LogLevel.DEBUG -> Log.d(tag, message, throwable)
+            LogLevel.INFO -> Log.i(tag, message, throwable)
+            LogLevel.WARNING -> Log.w(tag, message, throwable)
+            LogLevel.ERROR -> Log.e(tag, message, throwable)
+        }
+    }
+}
