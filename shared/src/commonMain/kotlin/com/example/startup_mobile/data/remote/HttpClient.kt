@@ -14,7 +14,10 @@ import kotlinx.serialization.json.Json
  * receive this and use [client], [baseUrl] and [authHeader] for requests.
  */
 class HttpClient(
-    val baseUrl: String = getPlatformContext().baseUrl.trimEnd('/'),
+    val baseUrl: String = run {
+        val rawBaseUrl = getPlatformContext().baseUrl.trimEnd('/')
+        if (rawBaseUrl.endsWith("/api/v1")) rawBaseUrl else "$rawBaseUrl/api/v1"
+    },
     val tokenProvider: (() -> String?)? = null,
 ) {
     val client: KtorHttpClient = createHttpClient {

@@ -5,8 +5,20 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserDto(
-    @SerialName("id") val id: String,
-    @SerialName("email") val email: String,
-    @SerialName("display_name") val displayName: String? = null,
+    @SerialName("id") val id: Int,
+    @SerialName("telegram_id") val telegramId: Int? = null,
+    @SerialName("role") val role: UserRole,
+    @SerialName("status") val status: UserStatus,
+    @SerialName("name") val name: String,
+    @SerialName("username") val username: String? = null,
     @SerialName("avatar_url") val avatarUrl: String? = null,
+    @SerialName("phone") val phone: String? = null,
+    @SerialName("email") val email: String? = null,
+    @SerialName("rating") val rating: Double,
+    @SerialName("reviews_count") val reviewsCount: Int,
+    @SerialName("created_at") val createdAt: String,
+    @SerialName("updated_at") val updatedAt: String,
+    @SerialName("is_provider") val isProvider: Boolean = false,
+    @SerialName("provider_id") val providerId: Int? = null,
+    @SerialName("verification_status") val verificationStatus: String? = null,
 )

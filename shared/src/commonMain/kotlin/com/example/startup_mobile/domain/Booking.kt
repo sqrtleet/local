@@ -1,11 +1,37 @@
 package com.example.startup_mobile.domain
 
 data class Booking(
-    val id: String,
-    val tourId: String,
-    val userId: String,
+    val id: Int,
+    val tourId: Int? = null,
+    val travelerId: Int? = null,
+    val bookingDate: String? = null,
+    val bookingTime: String? = null,
+    val participantsCount: Int? = null,
     val status: BookingStatus,
-    val createdAt: kotlinx.datetime.Instant?,
+    val paymentStatus: PaymentStatus? = null,
+    val unitPrice: String? = null,
+    val totalPrice: String? = null,
+    val platformFee: String? = null,
+    val providerPayout: String? = null,
+    val currency: String? = null,
+    val contactName: String? = null,
+    val contactPhone: String? = null,
+    val contactEmail: String? = null,
+    val travelerNotes: String? = null,
+    val providerNotes: String? = null,
+    val cancellationReason: String? = null,
+    val providerConfirmedAt: kotlinx.datetime.Instant? = null,
+    val travelerCompletedAt: kotlinx.datetime.Instant? = null,
+    val expiresAt: kotlinx.datetime.Instant? = null,
+    val createdAt: kotlinx.datetime.Instant? = null,
+    val updatedAt: kotlinx.datetime.Instant? = null,
+    val tourTitle: String? = null,
+    val tourImage: String? = null,
+    val tourRegion: String? = null,
+    val travelerName: String? = null,
+    val travelerAvatar: String? = null,
+    val providerName: String? = null,
+    val providerId: Int? = null,
 )
 
 enum class BookingStatus {
@@ -13,4 +39,5 @@ enum class BookingStatus {
     CONFIRMED,
     CANCELLED,
     COMPLETED,
+    EXPIRED,
 }

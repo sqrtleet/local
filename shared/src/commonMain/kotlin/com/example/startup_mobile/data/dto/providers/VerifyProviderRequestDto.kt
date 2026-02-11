@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class VerifyProviderRequestDto(
-    @SerialName("verification_status") val verificationStatus: String,
-    @SerialName("verification_note") val verificationNote: String? = null,
+    @SerialName("status") val status: VerificationStatus,
+    @SerialName("note") val note: String? = null,
 )

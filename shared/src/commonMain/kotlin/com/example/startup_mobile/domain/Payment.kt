@@ -9,8 +9,7 @@ data class Payment(
 
 enum class PaymentStatus {
     PENDING,
-    SUCCEEDED,
-    FAILED,
+    PAID,
     REFUNDED,
-    CANCELLED,
+    FAILED,
 }

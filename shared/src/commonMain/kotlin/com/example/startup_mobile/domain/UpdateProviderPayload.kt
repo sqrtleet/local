@@ -7,4 +7,5 @@ data class UpdateProviderPayload(
     val bio: String? = null,
     val experienceYears: Int? = null,
     val languages: List<String>? = null,
+    val paymentDetails: PaymentDetails? = null,
 )

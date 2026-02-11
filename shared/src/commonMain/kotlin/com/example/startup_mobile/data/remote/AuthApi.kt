@@ -15,7 +15,7 @@ class DefaultAuthApi(
     private val http: HttpClient,
 ) : AuthApi {
     override suspend fun getCurrentUser(): UserDto? {
-        val response: HttpResponse = http.client.get("${http.baseUrl}/me") {
+        val response: HttpResponse = http.client.get("${http.baseUrl}/auth/me") {
             http.authHeader()?.let { header("Authorization", "Bearer $it") }
         }
         return when (response.status) {

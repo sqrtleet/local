@@ -11,4 +11,5 @@ data class UpdateProviderRequestDto(
     @SerialName("bio") val bio: String? = null,
     @SerialName("experience_years") val experienceYears: Int? = null,
     @SerialName("languages") val languages: List<String>? = null,
+    @SerialName("payment_details") val paymentDetails: PaymentDetailsDto? = null,
 )

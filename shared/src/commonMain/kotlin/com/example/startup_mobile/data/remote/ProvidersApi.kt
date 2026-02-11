@@ -1,7 +1,9 @@
 package com.example.startup_mobile.data.remote
 
+import com.example.startup_mobile.data.dto.PaginatedResponse
 import com.example.startup_mobile.data.dto.providers.CreateProviderRequestDto
-import com.example.startup_mobile.data.dto.providers.ProviderDto
+import com.example.startup_mobile.data.dto.providers.ProviderListResponseDto
+import com.example.startup_mobile.data.dto.providers.ProviderResponseDto
 import com.example.startup_mobile.data.dto.providers.UpdateProviderRequestDto
 import com.example.startup_mobile.data.dto.providers.VerifyProviderRequestDto
 import io.ktor.client.call.body
@@ -16,34 +18,70 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.parameters
 
 interface ProvidersApi {
-    suspend fun getProviders(): List<ProviderDto>
-    suspend fun getProvider(id: Int): ProviderDto?
-    suspend fun createProvider(body: CreateProviderRequestDto): ProviderDto?
-    suspend fun getMyProviderProfile(): ProviderDto?
-    suspend fun updateMyProviderProfile(body: UpdateProviderRequestDto): ProviderDto?
-    suspend fun uploadProviderDocument(fileBytes: ByteArray, fileName: String): Boolean
+    suspend fun getProviders(
+        page: Int? = null,
+        perPage: Int? = null,
+        region: String? = null,
+        specialization: String? = null,
+        search: String? = null,
+        verifiedOnly: Boolean? = true,
+    ): PaginatedResponse<ProviderListResponseDto>
+
+    suspend fun getProvider(id: Int): ProviderResponseDto?
+    suspend fun createProvider(body: CreateProviderRequestDto): ProviderResponseDto?
+    suspend fun getMyProviderProfile(): ProviderResponseDto?
+    suspend fun updateMyProviderProfile(body: UpdateProviderRequestDto): ProviderResponseDto?
+    suspend fun uploadProviderDocument(
+        fileBytes: ByteArray,
+        fileName: String,
+        documentType: String,
+    ): ProviderResponseDto?
+
     suspend fun getRegions(): List<String>
     suspend fun getSpecializations(): List<String>
-    suspend fun getPendingVerifications(): List<ProviderDto>
-    suspend fun verifyProvider(providerId: Int, body: VerifyProviderRequestDto): ProviderDto?
+    suspend fun getPendingVerifications(
+        page: Int? = null,
+        perPage: Int? = null,
+    ): PaginatedResponse<ProviderListResponseDto>
+
+    suspend fun verifyProvider(providerId: Int, body: VerifyProviderRequestDto): ProviderResponseDto?
 }
 
 class DefaultProvidersApi(
     private val http: HttpClient,
 ) : ProvidersApi {
-    override suspend fun getProviders(): List<ProviderDto> {
+    override suspend fun getProviders(
+        page: Int?,
+        perPage: Int?,
+        region: String?,
+        specialization: String?,
+        search: String?,
+        verifiedOnly: Boolean?,
+    ): PaginatedResponse<ProviderListResponseDto> {
         val response: HttpResponse = http.client.get("${http.baseUrl}/providers") {
-            http.authHeader()?.let { header("Authorization", "Bearer $it") }
+            url {
+                parameters.appendAll(
+                    parameters {
+                        page?.let { append("page", it.toString()) }
+                        perPage?.let { append("per_page", it.toString()) }
+                        region?.takeIf { it.isNotBlank() }?.let { append("region", it) }
+                        specialization?.takeIf { it.isNotBlank() }?.let { append("specialization", it) }
+                        search?.takeIf { it.isNotBlank() }?.let { append("search", it) }
+                        verifiedOnly?.let { append("verified_only", it.toString()) }
+                    }
+                )
+            }
         }
         return when (response.status) {
             HttpStatusCode.OK -> response.body()
-            else -> emptyList()
+            else -> emptyPaginatedResponse(page, perPage)
         }
     }
 
-    override suspend fun getProvider(id: Int): ProviderDto? {
+    override suspend fun getProvider(id: Int): ProviderResponseDto? {
         val response: HttpResponse = http.client.get("${http.baseUrl}/providers/$id") {
             http.authHeader()?.let { header("Authorization", "Bearer $it") }
         }
@@ -53,7 +91,7 @@ class DefaultProvidersApi(
         }
     }
 
-    override suspend fun createProvider(body: CreateProviderRequestDto): ProviderDto? {
+    override suspend fun createProvider(body: CreateProviderRequestDto): ProviderResponseDto? {
         val response: HttpResponse = http.client.post("${http.baseUrl}/providers") {
             http.authHeader()?.let { header("Authorization", "Bearer $it") }
             setBody(body)
@@ -64,7 +102,7 @@ class DefaultProvidersApi(
         }
     }
 
-    override suspend fun getMyProviderProfile(): ProviderDto? {
+    override suspend fun getMyProviderProfile(): ProviderResponseDto? {
         val response: HttpResponse = http.client.get("${http.baseUrl}/providers/me") {
             http.authHeader()?.let { header("Authorization", "Bearer $it") }
         }
@@ -74,7 +112,7 @@ class DefaultProvidersApi(
         }
     }
 
-    override suspend fun updateMyProviderProfile(body: UpdateProviderRequestDto): ProviderDto? {
+    override suspend fun updateMyProviderProfile(body: UpdateProviderRequestDto): ProviderResponseDto? {
         val response: HttpResponse = http.client.put("${http.baseUrl}/providers/me") {
             http.authHeader()?.let { header("Authorization", "Bearer $it") }
             setBody(body)
@@ -85,19 +123,30 @@ class DefaultProvidersApi(
         }
     }
 
-    override suspend fun uploadProviderDocument(fileBytes: ByteArray, fileName: String): Boolean {
+    override suspend fun uploadProviderDocument(
+        fileBytes: ByteArray,
+        fileName: String,
+        documentType: String,
+    ): ProviderResponseDto? {
         val response: HttpResponse = http.client.post("${http.baseUrl}/providers/me/documents") {
             http.authHeader()?.let { header("Authorization", "Bearer $it") }
+            url {
+                parameters.appendAll(
+                    parameters {
+                        append("document_type", documentType)
+                    }
+                )
+            }
             setBody(
                 MultiPartFormDataContent(
                     formData {
                         append(
-                            "document",
+                            "file",
                             fileBytes,
                             Headers.build {
                                 append(
                                     HttpHeaders.ContentDisposition,
-                                    "form-data; name=\"document\"; filename=\"$fileName\""
+                                    "form-data; name=\"file\"; filename=\"$fileName\""
                                 )
                             }
                         )
@@ -105,7 +154,10 @@ class DefaultProvidersApi(
                 )
             )
         }
-        return response.status == HttpStatusCode.OK || response.status == HttpStatusCode.Created
+        return when (response.status) {
+            HttpStatusCode.OK -> response.body()
+            else -> null
+        }
     }
 
     override suspend fun getRegions(): List<String> {
@@ -128,17 +180,28 @@ class DefaultProvidersApi(
         }
     }
 
-    override suspend fun getPendingVerifications(): List<ProviderDto> {
+    override suspend fun getPendingVerifications(
+        page: Int?,
+        perPage: Int?,
+    ): PaginatedResponse<ProviderListResponseDto> {
         val response: HttpResponse = http.client.get("${http.baseUrl}/providers/pending") {
             http.authHeader()?.let { header("Authorization", "Bearer $it") }
+            url {
+                parameters.appendAll(
+                    parameters {
+                        page?.let { append("page", it.toString()) }
+                        perPage?.let { append("per_page", it.toString()) }
+                    }
+                )
+            }
         }
         return when (response.status) {
             HttpStatusCode.OK -> response.body()
-            else -> emptyList()
+            else -> emptyPaginatedResponse(page, perPage)
         }
     }
 
-    override suspend fun verifyProvider(providerId: Int, body: VerifyProviderRequestDto): ProviderDto? {
+    override suspend fun verifyProvider(providerId: Int, body: VerifyProviderRequestDto): ProviderResponseDto? {
         val response: HttpResponse = http.client.put("${http.baseUrl}/providers/$providerId/verify") {
             http.authHeader()?.let { header("Authorization", "Bearer $it") }
             setBody(body)
@@ -148,4 +211,15 @@ class DefaultProvidersApi(
             else -> null
         }
     }
+
+    private fun <T> emptyPaginatedResponse(
+        page: Int?,
+        perPage: Int?,
+    ): PaginatedResponse<T> = PaginatedResponse(
+        items = emptyList(),
+        total = 0,
+        page = page ?: 1,
+        perPage = perPage ?: 0,
+        pages = 0,
+    )
 }
