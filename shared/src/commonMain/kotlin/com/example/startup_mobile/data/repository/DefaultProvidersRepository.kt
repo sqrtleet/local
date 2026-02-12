@@ -22,19 +22,29 @@ class DefaultProvidersRepository(
         verifiedOnly: Boolean?,
     ): PaginatedResponse<Provider> {
         val response = api.getProviders(page, perPage, region, specialization, search, verifiedOnly)
-        return response.copy(items = response.items.map { it.toDomain() })
+        return PaginatedResponse(
+            items = response.items.map { it.toDomain() },
+            total = response.total,
+            page = response.page,
+            perPage = response.perPage,
+            pages = response.pages,
+        )
     }
+
     override suspend fun getProvider(id: Int): Provider? = api.getProvider(id)?.toDomain()
     override suspend fun getMyProviderProfile(): Provider? = api.getMyProviderProfile()?.toDomain()
     override suspend fun createProvider(payload: CreateProviderPayload): Provider? =
         api.createProvider(payload.toDto())?.toDomain()
+
     override suspend fun updateMyProviderProfile(payload: UpdateProviderPayload): Provider? =
         api.updateMyProviderProfile(payload.toDto())?.toDomain()
+
     override suspend fun uploadProviderDocument(
         fileBytes: ByteArray,
         fileName: String,
         documentType: String,
     ): Provider? = api.uploadProviderDocument(fileBytes, fileName, documentType)?.toDomain()
+
     override suspend fun getRegions(): List<String> = api.getRegions()
     override suspend fun getSpecializations(): List<String> = api.getSpecializations()
     override suspend fun getPendingVerifications(
@@ -42,8 +52,15 @@ class DefaultProvidersRepository(
         perPage: Int?,
     ): PaginatedResponse<Provider> {
         val response = api.getPendingVerifications(page, perPage)
-        return response.copy(items = response.items.map { it.toDomain() })
+        return PaginatedResponse(
+            items = response.items.map { it.toDomain() },
+            total = response.total,
+            page = response.page,
+            perPage = response.perPage,
+            pages = response.pages,
+        )
     }
+
     override suspend fun verifyProvider(
         providerId: Int,
         status: VerificationStatus,

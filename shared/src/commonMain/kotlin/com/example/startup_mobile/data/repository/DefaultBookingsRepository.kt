@@ -17,7 +17,13 @@ class DefaultBookingsRepository(
         status: BookingStatus?,
     ): PaginatedResponse<Booking> {
         val response = api.getMyBookings(page, perPage, status)
-        return response.copy(items = response.items.map { it.toDomain() })
+        return PaginatedResponse(
+            items = response.items.map { it.toDomain() },
+            total = response.total,
+            page = response.page,
+            perPage = response.perPage,
+            pages = response.pages,
+        )
     }
 
     override suspend fun getProviderBookings(
@@ -26,7 +32,13 @@ class DefaultBookingsRepository(
         status: BookingStatus?,
     ): PaginatedResponse<Booking> {
         val response = api.getProviderBookings(page, perPage, status)
-        return response.copy(items = response.items.map { it.toDomain() })
+        return PaginatedResponse(
+            items = response.items.map { it.toDomain() },
+            total = response.total,
+            page = response.page,
+            perPage = response.perPage,
+            pages = response.pages,
+        )
     }
 
     override suspend fun getBookingStats(): BookingStatsResponseDto? = api.getBookingStats()

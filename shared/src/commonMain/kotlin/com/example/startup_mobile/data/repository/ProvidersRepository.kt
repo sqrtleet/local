@@ -4,6 +4,7 @@ import com.example.startup_mobile.data.dto.PaginatedResponse
 import com.example.startup_mobile.domain.CreateProviderPayload
 import com.example.startup_mobile.domain.Provider
 import com.example.startup_mobile.domain.UpdateProviderPayload
+import com.example.startup_mobile.domain.VerificationStatus
 
 interface ProvidersRepository {
     suspend fun getProviders(
@@ -31,5 +32,5 @@ interface ProvidersRepository {
         perPage: Int? = null,
     ): PaginatedResponse<Provider>
 
-    suspend fun verifyProvider(providerId: Int, status: com.example.startup_mobile.domain.VerificationStatus, note: String?): Provider?
+    suspend fun verifyProvider(providerId: Int, status: VerificationStatus, note: String?): Provider?
 }

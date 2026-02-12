@@ -11,7 +11,13 @@ import com.example.startup_mobile.domain.Tour
 class DefaultToursRepository(private val api: ToursApi) : ToursRepository {
     override suspend fun getMyTours(page: Int?, perPage: Int?): PaginatedResponse<Tour> {
         val response = api.getMyTours(page, perPage)
-        return response.copy(items = response.items.map { it.toDomain() })
+        return PaginatedResponse(
+            items = response.items.map { it.toDomain() },
+            total = response.total,
+            page = response.page,
+            perPage = response.perPage,
+            pages = response.pages,
+        )
     }
 
     override suspend fun createTour(body: TourCreateDto): Tour? = api.createTour(body)?.toDomain()
