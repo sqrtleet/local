@@ -35,6 +35,7 @@ fun App() {
                 Text("Click me!")
             }
             AnimatedVisibility(showContent) {
+                // Sample/debug: template greeting, not part of product UI
                 val greeting = remember { Greeting().greet() }
                 Column(
                     modifier = Modifier.fillMaxWidth(),

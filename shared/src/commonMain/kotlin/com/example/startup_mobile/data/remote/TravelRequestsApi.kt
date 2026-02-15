@@ -24,35 +24,15 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.parameters
 
 interface TravelRequestsApi {
-    suspend fun getAvailableRequests(
-        page: Int? = null,
-        perPage: Int? = null,
-        region: String? = null,
-        categories: List<String> = emptyList(),
-    ): PaginatedResponse<TravelRequestListResponse>
-
-    suspend fun getMyRequests(
-        page: Int? = null,
-        perPage: Int? = null,
-        status: RequestStatus? = null,
-    ): PaginatedResponse<TravelRequestListResponse>
-
+    suspend fun getAvailableRequests(page: Int? = null, perPage: Int? = null, region: String? = null, categories: List<String> = emptyList()): PaginatedResponse<TravelRequestListResponse>
+    suspend fun getMyRequests(page: Int? = null, perPage: Int? = null, status: RequestStatus? = null): PaginatedResponse<TravelRequestListResponse>
     suspend fun createRequest(body: TravelRequestCreateDto): TravelRequestResponse?
     suspend fun getRequest(id: Int): TravelRequestResponse?
     suspend fun updateRequest(id: Int, body: TravelRequestUpdateDto): TravelRequestResponse?
     suspend fun cancelRequest(id: Int): TravelRequestResponse?
-    suspend fun getRequestOffers(
-        requestId: Int,
-        status: OfferStatus? = null,
-    ): List<ProviderOfferResponseDto>
-
+    suspend fun getRequestOffers(requestId: Int, status: OfferStatus? = null): List<ProviderOfferResponseDto>
     suspend fun getAvailableRequest(id: Int): TravelRequestResponse?
-    suspend fun getMyOffers(
-        page: Int? = null,
-        perPage: Int? = null,
-        status: OfferStatus? = null,
-    ): PaginatedResponse<ProviderOfferListResponseDto>
-
+    suspend fun getMyOffers(page: Int? = null, perPage: Int? = null, status: OfferStatus? = null): PaginatedResponse<ProviderOfferListResponseDto>
     suspend fun createOffer(body: ProviderOfferCreateDto): ProviderOfferResponseDto?
     suspend fun getOffer(id: Int): ProviderOfferResponseDto?
     suspend fun updateOffer(id: Int, body: ProviderOfferUpdateDto): ProviderOfferResponseDto?
@@ -61,15 +41,8 @@ interface TravelRequestsApi {
     suspend fun declineOffer(id: Int, body: OfferDeclineDto): ProviderOfferResponseDto?
 }
 
-class DefaultTravelRequestsApi(
-    private val http: HttpClient,
-) : TravelRequestsApi {
-    override suspend fun getAvailableRequests(
-        page: Int?,
-        perPage: Int?,
-        region: String?,
-        categories: List<String>,
-    ): PaginatedResponse<TravelRequestListResponse> {
+class DefaultTravelRequestsApi(private val http: HttpClient) : TravelRequestsApi {
+    override suspend fun getAvailableRequests(page: Int?, perPage: Int?, region: String?, categories: List<String>): PaginatedResponse<TravelRequestListResponse> {
         val response: HttpResponse = http.client.get("${http.baseUrl}/requests/available") {
             http.authHeader()?.let { header("Authorization", "Bearer $it") }
             url {
@@ -89,11 +62,7 @@ class DefaultTravelRequestsApi(
         }
     }
 
-    override suspend fun getMyRequests(
-        page: Int?,
-        perPage: Int?,
-        status: RequestStatus?,
-    ): PaginatedResponse<TravelRequestListResponse> {
+    override suspend fun getMyRequests(page: Int?, perPage: Int?, status: RequestStatus?): PaginatedResponse<TravelRequestListResponse> {
         val response: HttpResponse = http.client.get("${http.baseUrl}/requests/my") {
             http.authHeader()?.let { header("Authorization", "Bearer $it") }
             url {
@@ -154,10 +123,7 @@ class DefaultTravelRequestsApi(
         }
     }
 
-    override suspend fun getRequestOffers(
-        requestId: Int,
-        status: OfferStatus?,
-    ): List<ProviderOfferResponseDto> {
+    override suspend fun getRequestOffers(requestId: Int, status: OfferStatus?): List<ProviderOfferResponseDto> {
         val response: HttpResponse = http.client.get("${http.baseUrl}/requests/$requestId/offers") {
             http.authHeader()?.let { header("Authorization", "Bearer $it") }
             url {
@@ -184,11 +150,7 @@ class DefaultTravelRequestsApi(
         }
     }
 
-    override suspend fun getMyOffers(
-        page: Int?,
-        perPage: Int?,
-        status: OfferStatus?,
-    ): PaginatedResponse<ProviderOfferListResponseDto> {
+    override suspend fun getMyOffers(page: Int?, perPage: Int?, status: OfferStatus?): PaginatedResponse<ProviderOfferListResponseDto> {
         val response: HttpResponse = http.client.get("${http.baseUrl}/requests/offers/my") {
             http.authHeader()?.let { header("Authorization", "Bearer $it") }
             url {
@@ -240,9 +202,10 @@ class DefaultTravelRequestsApi(
     }
 
     override suspend fun withdrawOffer(id: Int): ProviderOfferResponseDto? {
-        val response: HttpResponse = http.client.post("${http.baseUrl}/requests/offers/$id/withdraw") {
-            http.authHeader()?.let { header("Authorization", "Bearer $it") }
-        }
+        val response: HttpResponse =
+            http.client.post("${http.baseUrl}/requests/offers/$id/withdraw") {
+                http.authHeader()?.let { header("Authorization", "Bearer $it") }
+            }
         return when (response.status) {
             HttpStatusCode.OK -> response.body()
             else -> null
@@ -250,10 +213,11 @@ class DefaultTravelRequestsApi(
     }
 
     override suspend fun acceptOffer(id: Int, body: OfferAcceptDto): ProviderOfferResponseDto? {
-        val response: HttpResponse = http.client.post("${http.baseUrl}/requests/offers/$id/accept") {
-            http.authHeader()?.let { header("Authorization", "Bearer $it") }
-            setBody(body)
-        }
+        val response: HttpResponse =
+            http.client.post("${http.baseUrl}/requests/offers/$id/accept") {
+                http.authHeader()?.let { header("Authorization", "Bearer $it") }
+                setBody(body)
+            }
         return when (response.status) {
             HttpStatusCode.OK -> response.body()
             else -> null
@@ -261,20 +225,18 @@ class DefaultTravelRequestsApi(
     }
 
     override suspend fun declineOffer(id: Int, body: OfferDeclineDto): ProviderOfferResponseDto? {
-        val response: HttpResponse = http.client.post("${http.baseUrl}/requests/offers/$id/decline") {
-            http.authHeader()?.let { header("Authorization", "Bearer $it") }
-            setBody(body)
-        }
+        val response: HttpResponse =
+            http.client.post("${http.baseUrl}/requests/offers/$id/decline") {
+                http.authHeader()?.let { header("Authorization", "Bearer $it") }
+                setBody(body)
+            }
         return when (response.status) {
             HttpStatusCode.OK -> response.body()
             else -> null
         }
     }
 
-    private fun <T> emptyPaginatedResponse(
-        page: Int?,
-        perPage: Int?,
-    ): PaginatedResponse<T> = PaginatedResponse(
+    private fun <T> emptyPaginatedResponse(page: Int?, perPage: Int?): PaginatedResponse<T> = PaginatedResponse(
         items = emptyList(),
         total = 0,
         page = page ?: 1,

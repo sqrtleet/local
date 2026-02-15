@@ -12,6 +12,7 @@ struct ContentView: View {
             }
 
             if showContent {
+                // Sample/debug: template greeting, not part of product UI
                 VStack(spacing: 16) {
                     Image(systemName: "swift")
                         .font(.system(size: 200))

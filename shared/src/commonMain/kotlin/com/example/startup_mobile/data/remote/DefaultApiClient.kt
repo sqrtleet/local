@@ -1,9 +1,8 @@
 package com.example.startup_mobile.data.remote
 
-import com.example.startup_mobile.platform.getKeyValueStorage
-
-private const val KEY_TOKEN = "auth_token"
-
-fun createDefaultHttpClient(): HttpClient = HttpClient(
-    tokenProvider = { getKeyValueStorage().getString(KEY_TOKEN) }
+/**
+ * Creates HttpClient with the given token provider (e.g. from [SessionRepository]).
+ */
+fun createDefaultHttpClient(tokenProvider: () -> String?): HttpClient = HttpClient(
+    tokenProvider = tokenProvider,
 )

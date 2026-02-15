@@ -4,7 +4,7 @@ data class Tour(
     val id: Int,
     val providerId: Int? = null,
     val title: String,
-    val description: String,
+    val description: String? = null,
     val shortDescription: String? = null,
     val category: TourCategory? = null,
     val price: String? = null,

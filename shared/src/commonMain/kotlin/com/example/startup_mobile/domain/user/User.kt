@@ -20,4 +20,3 @@ data class User(
     val providerId: Int?,
     val verificationStatus: String?,
 )
-

@@ -1,14 +1,15 @@
 package com.example.startup_mobile.data.repository
 
-import com.example.startup_mobile.data.dto.PaginatedResponse
 import com.example.startup_mobile.data.dto.providers.VerifyProviderRequestDto
 import com.example.startup_mobile.data.mapping.toDomain
 import com.example.startup_mobile.data.mapping.toDto
 import com.example.startup_mobile.data.remote.ProvidersApi
 import com.example.startup_mobile.domain.CreateProviderPayload
+import com.example.startup_mobile.domain.Page
 import com.example.startup_mobile.domain.Provider
 import com.example.startup_mobile.domain.UpdateProviderPayload
 import com.example.startup_mobile.domain.VerificationStatus
+import com.example.startup_mobile.domain.repository.ProvidersRepository
 
 class DefaultProvidersRepository(
     private val api: ProvidersApi,
@@ -20,9 +21,9 @@ class DefaultProvidersRepository(
         specialization: String?,
         search: String?,
         verifiedOnly: Boolean?,
-    ): PaginatedResponse<Provider> {
+    ): Page<Provider> {
         val response = api.getProviders(page, perPage, region, specialization, search, verifiedOnly)
-        return PaginatedResponse(
+        return Page(
             items = response.items.map { it.toDomain() },
             total = response.total,
             page = response.page,
@@ -50,9 +51,9 @@ class DefaultProvidersRepository(
     override suspend fun getPendingVerifications(
         page: Int?,
         perPage: Int?,
-    ): PaginatedResponse<Provider> {
+    ): Page<Provider> {
         val response = api.getPendingVerifications(page, perPage)
-        return PaginatedResponse(
+        return Page(
             items = response.items.map { it.toDomain() },
             total = response.total,
             page = response.page,

@@ -1,7 +1,7 @@
-package com.example.startup_mobile.data.repository
+package com.example.startup_mobile.domain.repository
 
-import com.example.startup_mobile.data.dto.PaginatedResponse
 import com.example.startup_mobile.domain.CreateProviderPayload
+import com.example.startup_mobile.domain.Page
 import com.example.startup_mobile.domain.Provider
 import com.example.startup_mobile.domain.UpdateProviderPayload
 import com.example.startup_mobile.domain.VerificationStatus
@@ -14,7 +14,7 @@ interface ProvidersRepository {
         specialization: String? = null,
         search: String? = null,
         verifiedOnly: Boolean? = true,
-    ): PaginatedResponse<Provider>
+    ): Page<Provider>
 
     suspend fun getProvider(id: Int): Provider?
     suspend fun getMyProviderProfile(): Provider?
@@ -30,7 +30,7 @@ interface ProvidersRepository {
     suspend fun getPendingVerifications(
         page: Int? = null,
         perPage: Int? = null,
-    ): PaginatedResponse<Provider>
+    ): Page<Provider>
 
     suspend fun verifyProvider(providerId: Int, status: VerificationStatus, note: String?): Provider?
 }
